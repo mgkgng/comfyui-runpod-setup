@@ -1,0 +1,29 @@
+# custom_nodes.txt
+# One git URL per line.
+
+# --- Manager ----------------------------------------------------------------
+https://github.com/Comfy-Org/ComfyUI-Manager
+
+# --- Identity / portraits ---------------------------------------------------
+https://github.com/balazik/ComfyUI-PuLID-Flux
+
+# --- Segmentation (SAM3 / face extraction) ----------------------------------
+https://github.com/1038lab/ComfyUI-RMBG
+
+# --- Mask / crop / utility (SEGS, separate masks, image ops) ----------------
+https://github.com/ltdrdata/ComfyUI-Impact-Pack
+https://github.com/ltdrdata/ComfyUI-Impact-Subpack
+https://github.com/kijai/ComfyUI-KJNodes
+https://github.com/cubiq/ComfyUI_essentials
+
+# --- Batch loading (per-face iteration) -------------------------------------
+https://github.com/WASasquatch/was-node-suite-comfyui
+
+# --- Video output (frames -> mp4) -------------------------------------------
+https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite
+
+# --- ControlNet preprocessors (DWPose, for the pose stage later) ------------
+https://github.com/Fannovel16/comfyui_controlnet_aux
+
+# --- QoL ---------------------------------------------------------------------
+https://github.com/rgthree/rgthree-comfy
