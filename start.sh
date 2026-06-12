@@ -51,11 +51,11 @@ log(){ echo -e "\n\033[1;36m[deploy]\033[0m $*"; }
 ############################################
 
 install_system_deps(){
-  if ! command -v git >/dev/null 2>&1 || ! command -v aria2c >/dev/null 2>&1; then
-    log "Installing system packages (git, aria2, wget, curl)..."
+  if ! command -v git >/dev/null 2>&1 || ! command -v aria2c >/dev/null 2>&1 || ! command -v unzip >/dev/null 2>&1; then
+    log "Installing system packages (git, aria2, wget, curl, unzip)..."
     export DEBIAN_FRONTEND=noninteractive
     apt-get update -y
-    apt-get install -y --no-install-recommends git aria2 wget curl ca-certificates
+    apt-get install -y --no-install-recommends git aria2 wget curl ca-certificates unzip
   fi
 }
 
@@ -146,16 +146,54 @@ download_models(){
     mkdir -p "$dest"
     [ -z "$fname" ] && fname="$(basename "${url%%\?*}")"
     if [ -f "$dest/$fname" ]; then echo "  = $subdir/$fname (exists)"; continue; fi
+    # archive already extracted on a prior boot? (zip is deleted after extract)
+    if [[ "$fname" == *.zip ]] && compgen -G "$dest/*.onnx" >/dev/null 2>&1; then
+      echo "  = $subdir (extracted, exists)"; continue
+    fi
     echo "  + $subdir/$fname"
     local hdr=()
     [[ "$url" == *huggingface.co* && -n "$HF_TOKEN" ]] && hdr=(--header="Authorization: Bearer $HF_TOKEN")
     if [[ "$url" == *civitai.com* && -n "$CIVITAI_TOKEN" ]]; then
       [[ "$url" == *\?* ]] && url="${url}&token=${CIVITAI_TOKEN}" || url="${url}?token=${CIVITAI_TOKEN}"
     fi
-    aria2c -x16 -s16 -k1M --continue=true "${hdr[@]}" -d "$dest" -o "$fname" "$url" \
-      || wget -q --show-progress "${hdr[@]/--header=/--header=}" -O "$dest/$fname" "$url" \
-      || echo "  ! download failed (skipped): $subdir/$fname"
+    if aria2c -x16 -s16 -k1M --continue=true "${hdr[@]}" -d "$dest" -o "$fname" "$url" \
+      || wget -q --show-progress "${hdr[@]/--header=/--header=}" -O "$dest/$fname" "$url"; then
+      [[ "$fname" == *.zip ]] && extract_flatten "$dest" "$fname"
+    else
+      echo "  ! download failed (skipped): $subdir/$fname"
+    fi
   done < "$list"
+  verify_models
+}
+
+# Unzip an archive into $dir, then lift model files out of any nested
+# folders so they sit directly in $dir (fixes antelopev2/antelopev2/*.onnx).
+extract_flatten(){
+  local dir="$1" zip="$2"
+  echo "  ~ extracting $zip"
+  ( cd "$dir" && unzip -oq "$zip" && rm -f "$zip" ) || { echo "  ! unzip failed: $zip"; return 0; }
+  # move any model files found below the top level up to $dir (portable mv)
+  find "$dir" -mindepth 2 -type f \
+    \( -name '*.onnx' -o -name '*.bin' -o -name '*.param' -o -name '*.safetensors' -o -name '*.pt' \) \
+    -exec mv -f {} "$dir"/ \; 2>/dev/null || true
+  # prune now-empty nested dirs
+  find "$dir" -mindepth 1 -type d -empty -delete 2>/dev/null || true
+}
+
+# Print what actually landed so a failed/gated download is obvious in logs.
+verify_models(){
+  log "Model inventory ($COMFYUI_DIR/models):"
+  local d
+  for d in diffusion_models text_encoders vae clip_vision style_models pulid loras \
+           insightface/models/antelopev2; do
+    local p="$COMFYUI_DIR/models/$d"
+    if compgen -G "$p/*" >/dev/null 2>&1; then
+      echo "  [ok] $d/"
+      ( cd "$p" && ls -1 ) | sed 's/^/        /'
+    else
+      echo "  [--] $d/  (empty)"
+    fi
+  done
 }
 
 launch(){
