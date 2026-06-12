@@ -106,7 +106,10 @@ setup_frontend(){
   fi
   if [ ! -d "$FRONTEND_DIR/dist" ] || [ "$FRONTEND_REBUILD" = "true" ]; then
     log "Building frontend fork (npm ci && npm run build)..."
-    ( cd "$FRONTEND_DIR" && npm ci && npm run build )
+    if ! ( cd "$FRONTEND_DIR" && npm ci && npm run build ); then
+      log "Frontend build FAILED -> falling back to bundled frontend"
+      USE_CUSTOM_FRONTEND=false
+    fi
   fi
 }
 
@@ -150,7 +153,8 @@ download_models(){
       [[ "$url" == *\?* ]] && url="${url}&token=${CIVITAI_TOKEN}" || url="${url}?token=${CIVITAI_TOKEN}"
     fi
     aria2c -x16 -s16 -k1M --continue=true "${hdr[@]}" -d "$dest" -o "$fname" "$url" \
-      || wget -q --show-progress "${hdr[@]/--header=/--header=}" -O "$dest/$fname" "$url"
+      || wget -q --show-progress "${hdr[@]/--header=/--header=}" -O "$dest/$fname" "$url" \
+      || echo "  ! download failed (skipped): $subdir/$fname"
   done < "$list"
 }
 

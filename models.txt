@@ -28,7 +28,3 @@ pulid | https://huggingface.co/guozinan/PuLID/resolve/main/pulid_flux_v0.9.1.saf
 # ---- InsightFace AntelopeV2 (PuLID face detect/align) ----------------------
 # Must end up at models/insightface/models/antelopev2/*.onnx (flatten if nested)
 insightface/models/antelopev2 | https://huggingface.co/MonsterMMORPG/tools/resolve/main/antelopev2.zip
-
-# ---- LoRAs (hyperreal skin) ------------------------------------------------
-# Realism LoRA — Civitai download id; replace 000000 with the actual version id.
-loras | https://civitai.com/api/download/models/000000 | flux_portrait_engine_realism.safetensors
