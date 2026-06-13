@@ -1,41 +1,38 @@
 #!/usr/bin/env bash
 # =============================================================================
-# ComfyUI auto-deploy bootstrap for RunPod
+# ComfyUI runtime launcher (for the image-baked build — see Dockerfile).
 # -----------------------------------------------------------------------------
-# Everything is installed onto the network volume (/workspace) inside a venv,
-# so the FIRST boot provisions and every later boot starts in seconds and runs
-# unchanged on ANY GPU you attach (cu128 torch covers Ampere -> Blackwell).
+# torch / ComfyUI / the frontend dist / custom nodes are ALREADY in the image.
+# This script only:
+#   1. points ComfyUI's data dirs (models, output, input, user) at the
+#      /workspace volume so they persist across pod recreation,
+#   2. starts model downloads in the BACKGROUND (models load on-demand at
+#      workflow run, NOT at startup), and
+#   3. launches the server immediately.
 #
 # Reachable at:  https://<POD_ID>-8188.proxy.runpod.net
 # =============================================================================
 set -Eeuo pipefail
 
 ############################################
-# CONFIG  (override any of these via RunPod template Environment Variables)
+# CONFIG  (override via RunPod template Environment Variables)
 ############################################
 WORKSPACE="${WORKSPACE:-/workspace}"
-VENV_DIR="${VENV_DIR:-$WORKSPACE/venv}"
+VENV_DIR="${VENV_DIR:-/opt/venv}"
+COMFYUI_DIR="${COMFYUI_DIR:-/opt/ComfyUI}"
+FRONTEND_DIR="${FRONTEND_DIR:-/opt/ComfyUI_frontend}"
 
-# --- Backend: official ComfyUI, OR point these at your own fork -------------
-COMFYUI_REPO="${COMFYUI_REPO:-https://github.com/comfyanonymous/ComfyUI.git}"
-COMFYUI_REF="${COMFYUI_REF:-master}"
-COMFYUI_DIR="${COMFYUI_DIR:-$WORKSPACE/ComfyUI}"
+# All mutable data lives on the volume (survives pod recreation, keeps image slim)
+DATA_DIR="${DATA_DIR:-$WORKSPACE}"
+MODELS_ROOT="${MODELS_ROOT:-$DATA_DIR/models}"
 
-# --- Frontend fork: set USE_CUSTOM_FRONTEND=true to build & serve your fork --
 USE_CUSTOM_FRONTEND="${USE_CUSTOM_FRONTEND:-true}"
-FRONTEND_REPO="${FRONTEND_REPO:-https://github.com/mgkgng/ComfyUI_frontend.git}"
-FRONTEND_REF="${FRONTEND_REF:-main}"
-FRONTEND_DIR="${FRONTEND_DIR:-$WORKSPACE/ComfyUI_frontend}"
-FRONTEND_REBUILD="${FRONTEND_REBUILD:-false}"   # set true to force a rebuild
-
-# --- GPU-agnostic torch: cu128 wheels run on RTX 3090 ... 5090 / B200 -------
-TORCH_INDEX_URL="${TORCH_INDEX_URL:-https://download.pytorch.org/whl/cu128}"
-TORCH_PKGS="${TORCH_PKGS:-torch torchvision torchaudio}"
-
-# --- Listen config (do not change unless you also change the exposed port) --
 COMFY_PORT="${COMFY_PORT:-8188}"
 COMFY_HOST="${COMFY_HOST:-0.0.0.0}"
 COMFY_EXTRA_ARGS="${COMFY_EXTRA_ARGS:-}"        # e.g. "--fast --use-sage-attention"
+
+# Set true to wait for all model downloads BEFORE launching (default: background)
+BLOCK_ON_MODELS="${BLOCK_ON_MODELS:-false}"
 
 # --- Tokens for gated / locked downloads ------------------------------------
 export HF_TOKEN="${HF_TOKEN:-}"
@@ -43,106 +40,30 @@ export CIVITAI_TOKEN="${CIVITAI_TOKEN:-}"
 export HF_HUB_ENABLE_HF_TRANSFER=1
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+log(){ echo -e "\n\033[1;36m[run]\033[0m $*"; }
 
-log(){ echo -e "\n\033[1;36m[deploy]\033[0m $*"; }
+# shellcheck disable=SC1091
+source "$VENV_DIR/bin/activate"
 
 ############################################
-# Steps (all idempotent -> safe to run every boot)
+# Steps
 ############################################
 
-install_system_deps(){
-  if ! command -v git >/dev/null 2>&1 || ! command -v aria2c >/dev/null 2>&1 || ! command -v unzip >/dev/null 2>&1; then
-    log "Installing system packages (git, aria2, wget, curl, unzip)..."
-    export DEBIAN_FRONTEND=noninteractive
-    apt-get update -y
-    apt-get install -y --no-install-recommends git aria2 wget curl ca-certificates unzip
-  fi
-}
-
-install_node(){
-  command -v node >/dev/null 2>&1 && return 0
-  log "Installing Node.js 20 (needed to build the frontend fork)..."
-  curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-  apt-get install -y nodejs
-}
-
-setup_python(){
-  if [ ! -d "$VENV_DIR" ]; then
-    log "Creating persistent venv at $VENV_DIR"
-    python3 -m venv "$VENV_DIR"
-  fi
-  # shellcheck disable=SC1091
-  source "$VENV_DIR/bin/activate"
-  pip install --upgrade pip wheel setuptools >/dev/null
-}
-
-install_torch(){
-  if python -c "import torch" >/dev/null 2>&1; then
-    log "torch already present: $(python -c 'import torch;print(torch.__version__)')"
-    return 0
-  fi
-  log "Installing torch from $TORCH_INDEX_URL"
-  pip install $TORCH_PKGS --index-url "$TORCH_INDEX_URL"
-}
-
-setup_comfyui(){
-  if [ ! -d "$COMFYUI_DIR/.git" ]; then
-    log "Cloning ComfyUI ($COMFYUI_REPO @ $COMFYUI_REF)"
-    git clone "$COMFYUI_REPO" "$COMFYUI_DIR"
-    git -C "$COMFYUI_DIR" checkout "$COMFYUI_REF"
-  fi
-  log "Installing ComfyUI requirements"
-  pip install -r "$COMFYUI_DIR/requirements.txt"
-  pip install -q "huggingface_hub[cli]" hf_transfer
-}
-
-setup_frontend(){
-  [ "$USE_CUSTOM_FRONTEND" = "true" ] || { log "Using bundled frontend"; return 0; }
-  install_node
-  if [ ! -d "$FRONTEND_DIR/.git" ]; then
-    log "Cloning frontend fork ($FRONTEND_REPO @ $FRONTEND_REF)"
-    git clone "$FRONTEND_REPO" "$FRONTEND_DIR"
-    git -C "$FRONTEND_DIR" checkout "$FRONTEND_REF"
-  fi
-  if [ ! -d "$FRONTEND_DIR/dist" ] || [ "$FRONTEND_REBUILD" = "true" ]; then
-    log "Building frontend fork (npm ci && npm run build)..."
-    if ! ( cd "$FRONTEND_DIR" && npm ci && npm run build ); then
-      log "Frontend build FAILED -> falling back to bundled frontend"
-      USE_CUSTOM_FRONTEND=false
-    fi
-  fi
-}
-
-install_custom_nodes(){
-  local list="$SCRIPT_DIR/custom_nodes.txt"
-  [ -f "$list" ] || return 0
-  local dir="$COMFYUI_DIR/custom_nodes"
-  mkdir -p "$dir"
-  log "Syncing custom nodes"
-  while IFS= read -r raw; do
-    local repo; repo="$(echo "$raw" | sed 's/#.*//' | xargs || true)"
-    [ -z "$repo" ] && continue
-    local name; name="$(basename "$repo" .git)"
-    if [ ! -d "$dir/$name" ]; then
-      echo "  + $name"
-      git clone --depth 1 "$repo" "$dir/$name" || { echo "  ! clone failed: $repo"; continue; }
-    else
-      echo "  = $name (exists)"
-    fi
-    [ -f "$dir/$name/requirements.txt" ] && pip install -q -r "$dir/$name/requirements.txt" || true
-  done < "$list"
+prepare_storage(){
+  log "Preparing data dirs on volume ($DATA_DIR)"
+  mkdir -p "$MODELS_ROOT" "$DATA_DIR/output" "$DATA_DIR/input" "$DATA_DIR/user"
 }
 
 download_models(){
   local list="$SCRIPT_DIR/models.txt"
   [ -f "$list" ] || return 0
-  log "Downloading models"
+  log "Downloading models -> $MODELS_ROOT (background)"
   while IFS='|' read -r subdir url fname; do
     subdir="$(echo "${subdir:-}" | xargs || true)"
     url="$(echo "${url:-}" | xargs || true)"
     fname="$(echo "${fname:-}" | xargs || true)"
     [[ -z "$subdir" || "$subdir" == \#* || -z "$url" ]] && continue
-    local dest="$COMFYUI_DIR/models/$subdir"
+    local dest="$MODELS_ROOT/$subdir"
     mkdir -p "$dest"
     [ -z "$fname" ] && fname="$(basename "${url%%\?*}")"
     if [ -f "$dest/$fname" ]; then echo "  = $subdir/$fname (exists)"; continue; fi
@@ -182,11 +103,11 @@ extract_flatten(){
 
 # Print what actually landed so a failed/gated download is obvious in logs.
 verify_models(){
-  log "Model inventory ($COMFYUI_DIR/models):"
+  log "Model inventory ($MODELS_ROOT):"
   local d
   for d in diffusion_models text_encoders vae clip_vision style_models pulid loras \
            insightface/models/antelopev2; do
-    local p="$COMFYUI_DIR/models/$d"
+    local p="$MODELS_ROOT/$d"
     if compgen -G "$p/*" >/dev/null 2>&1; then
       echo "  [ok] $d/"
       ( cd "$p" && ls -1 ) | sed 's/^/        /'
@@ -197,9 +118,12 @@ verify_models(){
 }
 
 launch(){
-  local args=(--listen "$COMFY_HOST" --port "$COMFY_PORT")
-  if [ "$USE_CUSTOM_FRONTEND" = "true" ]; then
+  # --base-directory points models/output/input/user at the volume.
+  local args=(--listen "$COMFY_HOST" --port "$COMFY_PORT" --base-directory "$DATA_DIR")
+  if [ "$USE_CUSTOM_FRONTEND" = "true" ] && [ -d "$FRONTEND_DIR/dist" ]; then
     args+=(--front-end-root "$FRONTEND_DIR/dist")
+  else
+    log "Custom frontend dist missing -> using bundled frontend"
   fi
   log "Starting ComfyUI on ${COMFY_HOST}:${COMFY_PORT}"
   echo    "  ===================================================================="
@@ -211,14 +135,13 @@ launch(){
 }
 
 main(){
-  mkdir -p "$WORKSPACE"
-  install_system_deps
-  setup_python
-  install_torch
-  setup_comfyui
-  setup_frontend
-  install_custom_nodes
-  download_models
+  prepare_storage
+  if [ "$BLOCK_ON_MODELS" = "true" ]; then
+    download_models
+  else
+    # background: UI is usable immediately; models stream in while you work.
+    download_models &
+  fi
   launch
 }
 main "$@"
