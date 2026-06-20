@@ -138,7 +138,7 @@ extract_flatten(){
 verify_models(){
   log "Model inventory ($COMFYUI_DIR/models):"
   local d
-  for d in diffusion_models text_encoders vae clip_vision style_models pulid loras \
+  for d in diffusion_models controlnet text_encoders vae clip_vision style_models pulid loras \
            insightface/models/antelopev2; do
     local p="$COMFYUI_DIR/models/$d"
     if compgen -G "$p/*" >/dev/null 2>&1; then

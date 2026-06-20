@@ -11,6 +11,10 @@ text_encoders | https://huggingface.co/comfyanonymous/flux_text_encoders/resolve
 # Smaller T5 for low-VRAM (use instead of fp16 if memory is tight)
 text_encoders | https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp8_e4m3fn.safetensors
 
+# ---- ControlNet ------------------------------------------------------------
+# Flux ControlNet Union Pro 2.0 (repo file is diffusion_pytorch_model.safetensors -> renamed)
+controlnet | https://huggingface.co/Shakker-Labs/FLUX.1-dev-ControlNet-Union-Pro-2.0/resolve/main/diffusion_pytorch_model.safetensors | FLUX.1-dev-ControlNet-Union-Pro-2.0.safetensors
+
 # ---- CLIP Vision (for Redux) -----------------------------------------------
 clip_vision | https://huggingface.co/Comfy-Org/sigclip_vision_384/resolve/main/sigclip_vision_patch14_384.safetensors
 
