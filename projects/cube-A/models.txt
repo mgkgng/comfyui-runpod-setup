@@ -1,0 +1,11 @@
+# models.txt  (project: cube-A)
+# Format (pipe-separated):   <models_subdir> | <url> | [optional_filename]
+# Flux base + its VAE are assumed already present on the target install.
+
+# ---- Text encoders / CLIP --------------------------------------------------
+text_encoders | https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors
+text_encoders | https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors
+
+# ---- Upscale model ---------------------------------------------------------
+# 4x-UltraSharp: best general-purpose detail upscaler (used by UltimateSDUpscale)
+upscale_models | https://huggingface.co/lokCX/4x-Ultrasharp/resolve/main/4x-UltraSharp.pth

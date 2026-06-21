@@ -1,0 +1,17 @@
+# custom_nodes.txt  (project: cube-A)
+# One git URL per line. '#' starts a comment.
+
+# --- Manager ----------------------------------------------------------------
+https://github.com/Comfy-Org/ComfyUI-Manager
+
+# --- QoL --------------------------------------------------------------------
+https://github.com/rgthree/rgthree-comfy
+
+# --- Mask / crop / detailer (Impact) ----------------------------------------
+https://github.com/ltdrdata/ComfyUI-Impact-Pack
+
+# --- Upscaling --------------------------------------------------------------
+https://github.com/ssitu/ComfyUI_UltimateSDUpscale
+
+# --- Utility nodes ----------------------------------------------------------
+https://github.com/cubiq/ComfyUI_essentials

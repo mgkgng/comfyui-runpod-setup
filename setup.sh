@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 # =============================================================================
-# ComfyUI add-ons setup
+# ComfyUI add-ons setup  (per-project)
 # -----------------------------------------------------------------------------
-# Adds custom nodes (custom_nodes.txt) and downloads models (models.txt) into
-# an EXISTING ComfyUI install. It does NOT install torch / ComfyUI / a venv and
-# does NOT launch anything. Flux base + its VAE are assumed already present.
+# Adds the custom nodes + models for a given PROJECT into an EXISTING ComfyUI
+# install. Manifests live in:  projects/<project>/custom_nodes.txt
+#                              projects/<project>/models.txt
+# It does NOT install torch / ComfyUI / a venv and does NOT launch anything.
+# Flux base + its VAE are assumed already present.
 #
 # Usage:
-#   ./setup.sh                      # autodetect ComfyUI dir
-#   COMFYUI_DIR=/path/to/ComfyUI ./setup.sh
-#   PYTHON=/path/to/venv/bin/python ./setup.sh   # pip target for node deps
+#   ./setup.sh <project>                       # e.g. ./setup.sh rembrandt
+#   COMFYUI_DIR=/path/to/ComfyUI ./setup.sh cube
+#   PYTHON=/path/to/venv/bin/python ./setup.sh rembrandt   # pip for node deps
 # =============================================================================
 set -Eeuo pipefail
 
@@ -29,6 +31,17 @@ log(){ echo -e "\n\033[1;36m[setup]\033[0m $*"; }
 die(){ echo -e "\033[1;31m[setup] $*\033[0m" >&2; exit 1; }
 
 pip_install(){ "$PYTHON" -m pip install "$@"; }
+
+# --- project selection (positional arg) -------------------------------------
+PROJECT="${1:-}"
+if [ -z "$PROJECT" ]; then
+  echo "Usage: $0 <project>" >&2
+  echo "Available projects:" >&2
+  ( cd "$SCRIPT_DIR/projects" 2>/dev/null && ls -1d */ 2>/dev/null | sed 's#/##; s/^/  /' ) >&2 || true
+  exit 1
+fi
+PROJECT_DIR="$SCRIPT_DIR/projects/$PROJECT"
+[ -d "$PROJECT_DIR" ] || die "Unknown project '$PROJECT' (no $PROJECT_DIR). Create it under projects/."
 
 ############################################
 # Locate the existing ComfyUI install
@@ -63,8 +76,8 @@ ensure_tools(){
 # Custom nodes
 ############################################
 install_custom_nodes(){
-  local list="$SCRIPT_DIR/custom_nodes.txt"
-  [ -f "$list" ] || { log "no custom_nodes.txt -> skipping nodes"; return 0; }
+  local list="$PROJECT_DIR/custom_nodes.txt"
+  [ -f "$list" ] || { log "no $list -> skipping nodes"; return 0; }
   local dir="$COMFYUI_DIR/custom_nodes"
   mkdir -p "$dir"
   log "Syncing custom nodes -> $dir"
@@ -86,8 +99,8 @@ install_custom_nodes(){
 # Models
 ############################################
 download_models(){
-  local list="$SCRIPT_DIR/models.txt"
-  [ -f "$list" ] || { log "no models.txt -> skipping models"; return 0; }
+  local list="$PROJECT_DIR/models.txt"
+  [ -f "$list" ] || { log "no $list -> skipping models"; return 0; }
   log "Downloading models -> $COMFYUI_DIR/models"
   while IFS='|' read -r subdir url fname; do
     subdir="$(echo "${subdir:-}" | xargs || true)"
@@ -139,7 +152,7 @@ verify_models(){
   log "Model inventory ($COMFYUI_DIR/models):"
   local d
   for d in diffusion_models controlnet text_encoders vae clip_vision style_models pulid loras \
-           insightface/models/antelopev2; do
+           upscale_models insightface/models/antelopev2; do
     local p="$COMFYUI_DIR/models/$d"
     if compgen -G "$p/*" >/dev/null 2>&1; then
       echo "  [ok] $d/"
@@ -152,7 +165,7 @@ verify_models(){
 
 main(){
   locate_comfyui
-  log "Target ComfyUI: $COMFYUI_DIR  (pip via: $PYTHON)"
+  log "Project: $PROJECT  ->  ComfyUI: $COMFYUI_DIR  (pip via: $PYTHON)"
   ensure_tools
   install_custom_nodes
   download_models
