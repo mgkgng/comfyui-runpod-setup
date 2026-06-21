@@ -1,0 +1,8 @@
+# custom_nodes.txt  (project: cube-B)
+# One git URL per line. '#' starts a comment.
+
+# --- Manager ----------------------------------------------------------------
+https://github.com/Comfy-Org/ComfyUI-Manager
+
+# --- Video output (frames -> mp4) -------------------------------------------
+https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite
