@@ -5,6 +5,13 @@
 # ---- Flux Fill dev (inpainting UNet, gated: needs HF_TOKEN) -----------------
 diffusion_models | https://huggingface.co/black-forest-labs/FLUX.1-Fill-dev/resolve/main/flux1-fill-dev.safetensors
 
+# ---- Flux text encoders / CLIP (public) ------------------------------------
+text_encoders | https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors
+text_encoders | https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors
+
+# ---- Flux VAE (ae, gated: needs HF_TOKEN) ----------------------------------
+vae | https://huggingface.co/black-forest-labs/FLUX.1-Fill-dev/resolve/main/ae.safetensors
+
 # ---- SAM3 (text/point promptable segmentation) -----------------------------
 # Node expects: models/sam3/sam3.pt   (facebook/sam3 is gated -> use 1038lab mirror)
 sam3 | https://huggingface.co/1038lab/sam3/resolve/main/sam3.pt
