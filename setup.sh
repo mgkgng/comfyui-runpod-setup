@@ -152,7 +152,7 @@ verify_models(){
   log "Model inventory ($COMFYUI_DIR/models):"
   local d
   for d in diffusion_models controlnet text_encoders vae clip_vision style_models pulid loras \
-           upscale_models insightface/models/antelopev2; do
+           upscale_models sam3 RMBG/BiRefNet insightface/models/antelopev2; do
     local p="$COMFYUI_DIR/models/$d"
     if compgen -G "$p/*" >/dev/null 2>&1; then
       echo "  [ok] $d/"

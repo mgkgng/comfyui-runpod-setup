@@ -1,0 +1,11 @@
+# models.txt  (project: seg1)
+# Format (pipe-separated):   <models_subdir> | <url> | [optional_filename]
+# Segmentation models for the ComfyUI-RMBG node. Public repos, no token needed.
+
+# ---- SAM3 (text/point promptable segmentation) -----------------------------
+# Node expects: models/sam3/sam3.pt   (facebook/sam3 is gated -> use 1038lab mirror)
+sam3 | https://huggingface.co/1038lab/sam3/resolve/main/sam3.pt
+
+# ---- BiRefNet (high-res matting / background removal) ----------------------
+# Node expects: models/RMBG/BiRefNet/<file>.safetensors
+RMBG/BiRefNet | https://huggingface.co/1038lab/BiRefNet/resolve/main/BiRefNet-general.safetensors

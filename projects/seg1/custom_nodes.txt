@@ -1,0 +1,8 @@
+# custom_nodes.txt  (project: seg1)
+# One git URL per line. '#' starts a comment.
+
+# --- Manager ----------------------------------------------------------------
+https://github.com/Comfy-Org/ComfyUI-Manager
+
+# --- Segmentation / background removal (loads SAM3 + BiRefNet) ---------------
+https://github.com/1038lab/ComfyUI-RMBG
