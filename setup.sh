@@ -52,7 +52,9 @@ locate_comfyui(){
     return 0
   fi
   local c
-  for c in "$PWD" "$PWD/ComfyUI" /workspace/ComfyUI "$HOME/ComfyUI" /ComfyUI; do
+  for c in "$PWD" "$PWD/ComfyUI" "$PWD/../ComfyUI" \
+           "$SCRIPT_DIR/../ComfyUI" "$(dirname "$SCRIPT_DIR")/ComfyUI" \
+           /workspace/ComfyUI "$HOME/ComfyUI" /ComfyUI; do
     if [ -f "$c/main.py" ] && [ -d "$c/custom_nodes" ]; then
       COMFYUI_DIR="$c"; return 0
     fi
