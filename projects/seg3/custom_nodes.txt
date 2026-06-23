@@ -1,0 +1,16 @@
+# custom_nodes.txt  (project: seg3)
+# One git URL per line. '#' starts a comment.
+# seg3 = Wan 2.2 Animate (character motion transfer): drive a character image
+#        with a reference video's motion (body + face + lips).
+
+# --- Manager ----------------------------------------------------------------
+https://github.com/Comfy-Org/ComfyUI-Manager
+
+# --- Wan video wrapper (Kijai) — runs the Wan2.2 Animate fp8 scaled model ----
+https://github.com/kijai/ComfyUI-WanVideoWrapper
+
+# --- Kijai utility nodes (commonly required by WanVideoWrapper workflows) ----
+https://github.com/kijai/ComfyUI-KJNodes
+
+# --- Video I/O: load driver clip -> frames, save frames -> video ------------
+https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite
