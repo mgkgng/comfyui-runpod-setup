@@ -1,0 +1,13 @@
+# custom_nodes.txt  (project: seg2)
+# One git URL per line. '#' starts a comment.
+# seg2 = segment a subject (SAM3/BiRefNet) then RESTYLE it with Flux.2 Klein 9B.
+# Flux.2 Klein is native to recent ComfyUI core -> no custom node for the edit itself.
+
+# --- Manager ----------------------------------------------------------------
+https://github.com/Comfy-Org/ComfyUI-Manager
+
+# --- Segmentation / matting (SAM3 + BiRefNet) -------------------------------
+https://github.com/1038lab/ComfyUI-RMBG
+
+# --- Video I/O: load clip -> frames, save frames -> video / PNG sequence ----
+https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite

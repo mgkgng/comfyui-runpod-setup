@@ -1,0 +1,24 @@
+# models.txt  (project: seg2)
+# Format (pipe-separated):   <models_subdir> | <url> | [optional_filename]
+# seg2 = SAM3/BiRefNet segmentation  +  Flux.2 Klein 9B image-edit restyle.
+# Needs ~24GB+ VRAM (RunPod A5000/4090 or A6000). fp8 weights below.
+
+# ---- SAM3 (text/point promptable segmentation) -----------------------------
+# Node expects: models/sam3/sam3.pt   (facebook/sam3 gated -> 1038lab mirror)
+sam3 | https://huggingface.co/1038lab/sam3/resolve/main/sam3.pt
+
+# ---- BiRefNet (high-res matting / edge refine) -----------------------------
+# Node expects: models/RMBG/BiRefNet/<file>.safetensors
+RMBG/BiRefNet | https://huggingface.co/1038lab/BiRefNet/resolve/main/BiRefNet-general.safetensors
+
+# ---- Flux.2 Klein 9B  (image edit / restyle) -------------------------------
+# Distilled fp8 (fast). For higher fidelity swap to the *base* 9b fp8 variant.
+# NOTE: verify the exact diffusion-model filename in the Comfy-Org repo tree;
+#       path inferred from the confirmed text-encoder/VAE Comfy-Org layout.
+diffusion_models | https://huggingface.co/Comfy-Org/flux2-klein-9B/resolve/main/split_files/diffusion_models/flux-2-klein-9b-fp8.safetensors
+
+# ---- Flux.2 text encoder (Qwen3-8B, fp8 mixed) -----------------------------
+text_encoders | https://huggingface.co/Comfy-Org/flux2-klein-9B/resolve/main/split_files/text_encoders/qwen_3_8b_fp8mixed.safetensors
+
+# ---- Flux.2 VAE ------------------------------------------------------------
+vae | https://huggingface.co/Comfy-Org/flux2-dev/resolve/main/split_files/vae/flux2-vae.safetensors
