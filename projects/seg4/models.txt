@@ -1,0 +1,17 @@
+# models.txt  (project: seg4)
+# Format (pipe-separated):   <models_subdir> | <url> | [optional_filename]
+# seg4 = Flux.2 Klein 4B image edit/restyle (light) for the face pipeline.
+# Sequential load (encode text -> free -> diffuse) => fits 11GB. Add --lowvram
+# if it spikes. For even lower VRAM swap to the GGUF variants (ComfyUI-GGUF).
+# NOTE: verify exact filenames in the Comfy-Org/flux2-klein-4B tree — repo
+#       paths shift. fp8 weights below.
+
+# ---- Flux.2 Klein 4B  (diffusion, fp8) -------------------------------------
+diffusion_models | https://huggingface.co/Comfy-Org/flux2-klein-4B/resolve/main/split_files/diffusion_models/flux-2-klein-4b-fp8.safetensors
+
+# ---- Text encoder (Qwen3-4B, fp8) — 4B Klein pairs with the 4B encoder -----
+# (the 9B Klein uses qwen_3_8b; do NOT mix them up)
+text_encoders | https://huggingface.co/Comfy-Org/flux2-klein-4B/resolve/main/split_files/text_encoders/qwen_3_4b.safetensors
+
+# ---- VAE (shared flux2 vae, small) -----------------------------------------
+vae | https://huggingface.co/Comfy-Org/flux2-dev/resolve/main/split_files/vae/flux2-vae.safetensors

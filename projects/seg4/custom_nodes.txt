@@ -1,0 +1,17 @@
+# custom_nodes.txt  (project: seg4)
+# One git URL per line. '#' starts a comment.
+# seg4 = Flux.2 Klein 4B restyle + the face pipeline (crowd -> sort -> morph).
+# Flux.2 Klein is native to recent ComfyUI core -> no custom node for the edit.
+
+# --- Manager ----------------------------------------------------------------
+https://github.com/Comfy-Org/ComfyUI-Manager
+
+# --- tinode (my custom nodes: mask crop, face sort, batch drop, morph) -------
+https://github.com/mgkgng/tinode
+
+# --- Face detect / crop: Impact Pack + Subpack (UltralyticsDetectorProvider) -
+https://github.com/ltdrdata/ComfyUI-Impact-Pack
+https://github.com/ltdrdata/ComfyUI-Impact-Subpack
+
+# --- GGUF loader (optional low-VRAM Klein 4B GGUF path) ----------------------
+https://github.com/city96/ComfyUI-GGUF
