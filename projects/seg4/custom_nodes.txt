@@ -13,5 +13,8 @@ https://github.com/mgkgng/tinode
 https://github.com/ltdrdata/ComfyUI-Impact-Pack
 https://github.com/ltdrdata/ComfyUI-Impact-Subpack
 
+# --- SAM3 text-prompt segmentation (EasySAM3Segment: head/face masks) --------
+https://github.com/yolain/ComfyUI-Easy-Sam3
+
 # --- GGUF loader (optional low-VRAM Klein 4B GGUF path) ----------------------
 https://github.com/city96/ComfyUI-GGUF
