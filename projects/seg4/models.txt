@@ -20,3 +20,10 @@ vae | https://huggingface.co/Comfy-Org/flux2-dev/resolve/main/split_files/vae/fl
 # facebook/sam3 is gated -> 1038lab mirror. EasySAM3 may expect a different
 # subdir/filename; verify where the node loads it (models/sam3 vs its own dir).
 sam3 | https://huggingface.co/1038lab/sam3/resolve/main/sam3.pt
+
+# ---- CodeFormer face restore (facerestore_cf node) -------------------------
+facerestore_models | https://github.com/sczhou/CodeFormer/releases/download/v0.1.0/codeformer.pth
+
+# ---- facexlib helper weights (face detect + parse; else auto-pulled at run) -
+facexlib | https://github.com/xinntao/facexlib/releases/download/v0.1.0/detection_Resnet50_Final.pth
+facexlib | https://github.com/xinntao/facexlib/releases/download/v0.1.0/parsing_parsenet.pth

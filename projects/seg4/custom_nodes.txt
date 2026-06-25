@@ -16,5 +16,8 @@ https://github.com/ltdrdata/ComfyUI-Impact-Subpack
 # --- SAM3 text-prompt segmentation (EasySAM3Segment: head/face masks) --------
 https://github.com/yolain/ComfyUI-Easy-Sam3
 
+# --- Face restore (CodeFormer): FaceRestoreModelLoader / FaceRestoreCFWithModel
+https://github.com/mav-rik/facerestore_cf
+
 # --- GGUF loader (optional low-VRAM Klein 4B GGUF path) ----------------------
 https://github.com/city96/ComfyUI-GGUF
