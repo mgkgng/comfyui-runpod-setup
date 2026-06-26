@@ -1,0 +1,15 @@
+# custom_nodes.txt  (project: seg5)
+# One git URL per line. '#' starts a comment.
+# seg5 = Wan 2.2 First-Last-Frame to Video (bud frame -> flower frame, Wan
+# generates the opening motion between them). The WanFirstLastFrameToVideo
+# node is NATIVE ComfyUI core -> no custom node required for it; runs on the
+# i2v high/low-noise 14B models in models.txt. Only need video I/O below.
+
+# --- Manager ----------------------------------------------------------------
+https://github.com/Comfy-Org/ComfyUI-Manager
+
+# --- Video I/O: load image -> frames, save frames -> video / mp4 ------------
+https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite
+
+# --- Kijai utility nodes (optional; common in Wan workflows) ----------------
+https://github.com/kijai/ComfyUI-KJNodes
