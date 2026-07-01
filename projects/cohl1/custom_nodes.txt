@@ -1,0 +1,27 @@
+# custom_nodes.txt  (project: cohl1)
+# COHL freelance test mission — masked video inpaint/edit (Wan 2.2 Fun VACE)
+# + video mask-tracking (EasySAM3). One git URL per line.
+
+# --- Manager ----------------------------------------------------------------
+https://github.com/Comfy-Org/ComfyUI-Manager
+
+# --- tinode (my nodes: mask crop/paste-back, index switch, batch/mask select) -
+https://github.com/mgkgng/tinode
+
+# --- Wan video wrapper (Kijai) — VACE fp8, block-swap for 24GB VRAM ----------
+https://github.com/kijai/ComfyUI-WanVideoWrapper
+
+# --- Kijai utility nodes (masks, video helpers common to Wan workflows) ------
+https://github.com/kijai/ComfyUI-KJNodes
+
+# --- Video I/O: load clip -> frames, save frames -> mp4 ---------------------
+https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite
+
+# --- SAM3 video segmentation / tracking (text prompt -> mask through motion) -
+https://github.com/yolain/ComfyUI-Easy-Sam3
+
+# --- Impact Pack (mask ops: grow/feather, SEGS) -----------------------------
+https://github.com/ltdrdata/ComfyUI-Impact-Pack
+
+# --- GGUF loader (optional lower-VRAM VACE path) ----------------------------
+https://github.com/city96/ComfyUI-GGUF

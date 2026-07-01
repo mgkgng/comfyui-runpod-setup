@@ -1,0 +1,24 @@
+# models.txt  (project: cohl1)
+# COHL freelance test mission — masked VIDEO editing/inpainting on Seedance
+# footage: (1) remove stocking from one leg (regenerate bare skin), (2) restore
+# a stocking that vanishes mid-clip. Tool = Wan 2.2 Fun VACE (masked video-to-
+# video). Mask-tracking = EasySAM3 (text prompt -> per-frame mask).
+# Format:  <models_subdir> | <url> | [optional_filename]
+# Wan 2.2 Fun VACE 14B fp8 scaled: MoE high+low experts run sequentially ->
+# fits 24GB. Verified in Comfy-Org/Wan_2.2_ComfyUI_Repackaged.
+
+# ---- Wan 2.2 Fun VACE 14B  high-noise expert (fp8 scaled) ------------------
+diffusion_models | https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_fun_vace_high_noise_14B_fp8_scaled.safetensors
+
+# ---- Wan 2.2 Fun VACE 14B  low-noise expert (fp8 scaled) -------------------
+diffusion_models | https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_fun_vace_low_noise_14B_fp8_scaled.safetensors
+
+# ---- Text encoder (umt5-xxl fp8 scaled) ------------------------------------
+text_encoders | https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors
+
+# ---- VAE (Wan 2.1) ---------------------------------------------------------
+vae | https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors
+
+# ---- SAM3 (EasySAM3 video mask-tracking; text prompt -> per-frame mask) -----
+# facebook/sam3 gated -> 1038lab mirror. Verify EasySAM3's expected load path.
+sam3 | https://huggingface.co/1038lab/sam3/resolve/main/sam3.pt
